@@ -5,12 +5,9 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
-import Reika.DragonAPI.Libraries.Java.ReikaJavaLibrary;
-import Reika.DragonAPI.Libraries.Java.ReikaRandomHelper;
 import Reika.DragonAPI.Libraries.Registry.ReikaParticleHelper;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -26,26 +23,67 @@ public class TileRoomController extends TileEntity {
 
 	@Override
 	public void updateEntity() {
-		if (!worldObj.isRemote && (bounds == null || worldObj.getTotalWorldTime()%128 == 0)) {
+		boolean red = worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
+		if (!worldObj.isRemote && (bounds == null || (red && worldObj.getTotalWorldTime()%128 == 0))) {
 			this.getDimensions();
 		}
-		if (worldObj.isRemote && bounds != null) {
+		if (worldObj.isRemote && bounds != null && red) {
 			this.doParticles();
 		}
 	}
 
 	private void doParticles() {
-		AxisAlignedBB box = bounds.asAABB();
-		int n = Math.max(1, bounds.getVolume()/250);
-		double rx = ReikaRandomHelper.getRandomBetween(box.minX, box.maxX);
-		double ry = ReikaRandomHelper.getRandomBetween(box.minY, box.maxY);
-		double rz = ReikaRandomHelper.getRandomBetween(box.minZ, box.maxZ);
-		ReikaParticleHelper.ENCHANTMENT.spawnAt(worldObj, rx, ry, rz);
+		double f = (worldObj.getTotalWorldTime()%20)/20D;
+		for (int i = 0; i < 6; i++) {
+			ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
+			int d = 0;
+			int x = xCoord+dir.offsetX*d;
+			int y = yCoord+dir.offsetY*d;
+			int z = zCoord+dir.offsetZ*d;
+			while (bounds.isBlockInside(x, y, z)) {
+				int x2 = xCoord+dir.offsetX*(d+2);
+				int y2 = yCoord+dir.offsetY*(d+2);
+				int z2 = zCoord+dir.offsetZ*(d+2);
+				if (bounds.isBlockInside(x2, y2, z2)) {
+					double px = x+0.5;
+					double py = y+0.5;
+					double pz = z+0.5;
+					switch(dir) {
+						case DOWN:
+							py = y-f;
+							break;
+						case UP:
+							py = y+1+f;
+							break;
+						case WEST:
+							px = x-f;
+							break;
+						case EAST:
+							px = x+1+f;
+							break;
+						case NORTH:
+							pz = z-f;
+							break;
+						case SOUTH:
+							pz = z+1+f;
+							break;
+						default:
+							break;
+					}
+					ReikaParticleHelper.REDSTONE.spawnAt(worldObj, px, py, pz);
+				}
+				d++;
+				x = xCoord+dir.offsetX*d;
+				y = yCoord+dir.offsetY*d;
+				z = zCoord+dir.offsetZ*d;
+			}
+		}
 	}
 
 	private void getDimensions() {
 		int[] dists = new int[6];
 		for (int i = 0; i < 6; i++) {
+			dists[i] = MAX_SIZE;
 			ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
 			for (int d = 1; d <= MAX_SIZE; d++) {
 				int dx = xCoord+dir.offsetX*d;
@@ -54,7 +92,7 @@ public class TileRoomController extends TileEntity {
 				if (ArchiSections.isOpaqueForRoom(worldObj, dx, dy, dz)) {
 					//bounds = bounds.clamp(dir, xCoord, yCoord, zCoord, d-1);
 					dists[i] = d-1;
-					ReikaJavaLibrary.pConsole("Found limit "+d+" at "+dir);
+					//ReikaJavaLibrary.pConsole("Found limit "+d+" at "+dir);
 					break;
 				}
 			}

@@ -31,6 +31,7 @@ import Reika.DragonAPI.Instantiable.Event.Client.TileEntityRenderEvent;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.Instantiable.Rendering.StructureRenderer;
+import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -80,7 +81,7 @@ public class ArchiSections extends DragonAPIMod {
 	public void load(FMLInitializationEvent event) {
 		this.startTiming(LoadPhase.LOAD);
 		GameRegistry.addShapedRecipe(new ItemStack(roomBlock, 2, 0),
-				"rgr", "sis", "srs", 'i', Items.iron_ingot, 's', Blocks.stone, 'r', Items.redstone, 'g', Items.glowstone_dust);
+				"rgr", "sis", "srs", 'i', Items.iron_ingot, 's', Blocks.cobblestone, 'r', Items.redstone, 'g', Items.glowstone_dust);
 		this.finishTiming();
 	}
 
@@ -141,18 +142,18 @@ public class ArchiSections extends DragonAPIMod {
 
 	@SubscribeEvent
 	public void interceptTileRender(TileEntityRenderEvent evt) {
-		Room r = RoomTracker.instance.getRoomForTile(evt.tileEntity);
 		if (evt.tileEntity.worldObj == null || StructureRenderer.isRenderingTiles())
 			return;
+		Room r = RoomTracker.instance.getRoomForTile(evt.tileEntity);
 		if (!RoomTracker.instance.isActiveRoom(r))
 			evt.setCanceled(true);
 	}
 
 	@SubscribeEvent
 	public void interceptEntityRender(EntityRenderEvent evt) {
-		Room r = RoomTracker.instance.getRoomForEntity(evt.entity);
 		if (evt.entity.worldObj == null)
 			return;
+		Room r = RoomTracker.instance.getRoomForEntity(evt.entity);
 		if (!RoomTracker.instance.isActiveRoom(r))
 			evt.setCanceled(true);
 	}
@@ -185,7 +186,7 @@ public class ArchiSections extends DragonAPIMod {
 	public static boolean isOpaqueForRoom(World world, int x, int y, int z) {
 		Block b = world.getBlock(x, y, z);
 		int meta = world.getBlockMetadata(x, y, z);
-		if (b.isAir(world, x, y, z))
+		if (b.isAir(world, x, y, z) || ReikaWorldHelper.softBlocks(world, x, y, z))
 			return false;
 		return b.isOpaqueCube() || b.renderAsNormalBlock();
 	}
