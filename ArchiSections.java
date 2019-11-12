@@ -93,7 +93,7 @@ public class ArchiSections extends DragonAPIMod {
 
 	@Override
 	public String getDisplayName() {
-		return "RenderRooms";
+		return "ArchiSections";
 	}
 
 	@Override
