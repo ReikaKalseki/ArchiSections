@@ -1,6 +1,5 @@
 package Reika.ArchiSections;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
@@ -8,8 +7,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
+import Reika.DragonAPI.Base.BlockTEBase;
 
-public class RoomBlock extends Block {
+
+public class RoomBlock extends BlockTEBase {
 
 	private IIcon iconBottom;
 	private IIcon iconTop;

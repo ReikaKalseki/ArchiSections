@@ -12,6 +12,9 @@ import net.minecraft.util.Vec3;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
 import Reika.DragonAPI.Instantiable.Data.Immutable.Coordinate;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
 public class RoomTracker {
 
 	public static final RoomTracker instance = new RoomTracker();
@@ -71,6 +74,7 @@ public class RoomTracker {
 		this.recalculateRoomCache();
 	}
 
+	@SideOnly(Side.CLIENT)
 	public Room getActiveRoom() {
 		//this.clear();
 		return this.getRoomForEntity(Minecraft.getMinecraft().thePlayer);

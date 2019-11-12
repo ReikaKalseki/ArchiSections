@@ -44,6 +44,8 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 @Mod( modid = "ArchiSections", name="ArchiSections", version = "v@MAJOR_VERSION@@MINOR_VERSION@", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI")
 
@@ -128,6 +130,7 @@ public class ArchiSections extends DragonAPIMod {
 	}
 
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void interceptChunkRender(ChunkWorldRenderEvent evt) {
 		Room r = RoomTracker.instance.getActiveRoom();
 		if (r == null) { //do not bother culling if you are not in a room
@@ -141,6 +144,7 @@ public class ArchiSections extends DragonAPIMod {
 	}
 
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void interceptTileRender(TileEntityRenderEvent evt) {
 		if (evt.tileEntity.worldObj == null || StructureRenderer.isRenderingTiles())
 			return;
@@ -150,6 +154,7 @@ public class ArchiSections extends DragonAPIMod {
 	}
 
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void interceptEntityRender(EntityRenderEvent evt) {
 		if (evt.entity.worldObj == null)
 			return;
@@ -159,6 +164,7 @@ public class ArchiSections extends DragonAPIMod {
 	}
 
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void clearCache(SinglePlayerLogoutEvent evt) {
 		RoomTracker.instance.clear();
 	}
@@ -169,6 +175,7 @@ public class ArchiSections extends DragonAPIMod {
 	}
 
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void clearCache(ClientLogoutEvent evt) {
 		RoomTracker.instance.clear();
 	}
@@ -179,6 +186,7 @@ public class ArchiSections extends DragonAPIMod {
 	}*/
 	/*
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void interceptEntityRender(AddParticleEvent evt) {
 
 	}*/
