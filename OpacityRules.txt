@@ -1,8 +1,24 @@
 Combination Rules - A block will be opaque if and only if this logical combination of property checks evaluates to TRUE
 {
-	
+	AND = {
+		OR = {
+			OPAQUECUBE
+			AND = {
+				RENDERTYPEZERO
+				FULLLIGHTOPACITY
+			}
+			AND = {
+				RENDERTYPEZERO
+				OPAQUEMATERIAL
+			}
+		}
+		NOR = {
+			AIRMATERIAL
+			LIQUIDMATERIAL
+		}
+	}
 }
-
+====================================================================
 Valid property checks:
 	OPAQUECUBE (Block isOpaqueCube() returns true)
 	NORMALRENDER (Block renderAsNormalBlock() returns true)
@@ -15,6 +31,9 @@ Valid property checks:
 	
 Valid logical combinators:
 AND, OR, NOT, XOR, NOR, NAND, XNOR
+Note that XOR with more than two inputs is treated as "one and only one of them is true".
+	
+Note that there is an implicit top-level AND around all top-level parameters.
 	
 Example
 This combination will result in true if the block has any of OPAQUECUBE, OPAQUEMATERIAL, FULLLIGHTOPACITY, provided it has neither AIRMATERIAL nor LIQUIDMATERIAL:
