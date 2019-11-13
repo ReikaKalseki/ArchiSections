@@ -107,7 +107,7 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 				int dx = x+dir.offsetX*d;
 				int dy = y+dir.offsetY*d;
 				int dz = z+dir.offsetZ*d;
-				if (ArchiSections.isOpaqueForRoom(world, dx, dy, dz)) {
+				if (TransparencyRules.instance.isOpaqueForRoom(world, dx, dy, dz)) {
 					//bounds = bounds.clamp(dir, xCoord, yCoord, zCoord, d-1);
 					dists[i] = d-1;
 					//ReikaJavaLibrary.pConsole("Found limit "+d+" at "+dir);

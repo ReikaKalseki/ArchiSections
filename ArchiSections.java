@@ -12,11 +12,9 @@ package Reika.ArchiSections;
 import java.io.File;
 import java.net.URL;
 
-import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.DragonOptions;
@@ -31,7 +29,6 @@ import Reika.DragonAPI.Instantiable.Event.Client.TileEntityRenderEvent;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
 import Reika.DragonAPI.Instantiable.Rendering.StructureRenderer;
-import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -60,14 +57,23 @@ public class ArchiSections extends DragonAPIMod {
 
 	public static RoomBlock roomBlock;
 
+	public static boolean requireSolidWalls;
+
 	@Override
 	@EventHandler
 	public void preload(FMLPreInitializationEvent evt) {
 		this.startTiming(LoadPhase.PRELOAD);
 		this.verifyInstallation();
+
 		logger = new ModLogger(instance, false);
 		if (DragonOptions.FILELOG.getState())
 			logger.setOutput("**_Loading_Log.log");
+
+		config.loadSubfolderedConfigFile(evt);
+		config.loadDataFromFile(evt);
+		requireSolidWalls = config.getBoolean("Options", "Require Solid Walls", false);
+		TransparencyRules.instance.loadSettings(config);
+		config.finishReading();
 
 		roomBlock = new RoomBlock();
 		GameRegistry.registerBlock(roomBlock, "room");
@@ -91,6 +97,7 @@ public class ArchiSections extends DragonAPIMod {
 	@EventHandler
 	public void postload(FMLPostInitializationEvent evt) {
 		this.startTiming(LoadPhase.POSTLOAD);
+		TransparencyRules.instance.load();
 		this.finishTiming();
 	}
 
@@ -190,13 +197,5 @@ public class ArchiSections extends DragonAPIMod {
 	public void interceptEntityRender(AddParticleEvent evt) {
 
 	}*/
-
-	public static boolean isOpaqueForRoom(World world, int x, int y, int z) {
-		Block b = world.getBlock(x, y, z);
-		int meta = world.getBlockMetadata(x, y, z);
-		if (b.isAir(world, x, y, z) || ReikaWorldHelper.softBlocks(world, x, y, z))
-			return false;
-		return b.isOpaqueCube() || b.renderAsNormalBlock();
-	}
 
 }
