@@ -7,7 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
+import java.util.TreeMap;
+import java.util.function.Function;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -17,6 +18,7 @@ import net.minecraft.world.World;
 import Reika.DragonAPI.Exception.UnreachableCodeException;
 import Reika.DragonAPI.IO.ReikaFileReader;
 import Reika.DragonAPI.Instantiable.LogicalCombination;
+import Reika.DragonAPI.Instantiable.LogicalCombination.EvaluatorConstructor;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockKey;
 import Reika.DragonAPI.Instantiable.IO.LuaBlock;
 import Reika.DragonAPI.Instantiable.IO.LuaBlock.LuaBlockDatabase;
@@ -26,14 +28,14 @@ import Reika.DragonAPI.Libraries.Java.ReikaStringParser;
 import Reika.DragonAPI.Libraries.Logic.LogicalOperators;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
 
-public class TransparencyRules {
+public class TransparencyRules implements EvaluatorConstructor<Block> {
 
 	public static final TransparencyRules instance = new TransparencyRules();
 
-	private final HashMap<BlockKey, TransparencyRule> data = new HashMap();
+	private final TreeMap<BlockKey, TransparencyRule> data = new TreeMap();
 	private final HashMap<BlockKey, Boolean> overrides = new HashMap();
 
-	private LogicalCombination opacityRules;
+	private LogicalCombination<Block> opacityRules;
 
 	private TransparencyRules() {
 
@@ -63,9 +65,13 @@ public class TransparencyRules {
 				sb.append(s2);
 				sb.append("\n");
 			}
-			for (LuaBlock b : data.getRootBlock().getChildren()) {
+			LuaBlock lb = data.getRootBlock();
+			if (lb.getChildren().size() != 1) {
 
 			}
+			opacityRules.populate(lb.getChildren().iterator().next(), this);
+			ArchiSections.logger.log("Parsed opacity logic tree:\n"+opacityRules);
+			//ReikaJavaLibrary.pConsole(opacityRules.toString());
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -163,7 +169,6 @@ public class TransparencyRules {
 			for (int i = 0; i < 16; i++) {
 				BlockKey bk = new BlockKey(b, i);
 				TransparencyRule tr = new TransparencyRule(bk, def);
-				tr.isOpaque = tr.isDefaultOpaque;
 				Boolean override = overrides.get(bk);
 				if (override != null)
 					tr.isOpaque = override.booleanValue();
@@ -172,9 +177,17 @@ public class TransparencyRules {
 		}
 	}
 
+	public ArrayList<String> getData() {
+		ArrayList<String> ret = new ArrayList();
+		for (TransparencyRule e : data.values()) {
+			ret.add(e.toString());
+		}
+		return ret;
+	}
+
 	private boolean calculateDefaultOpacity(Block b) {
 		try {
-			return opacityRules.call();
+			return opacityRules.apply(b);
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
@@ -238,21 +251,29 @@ public class TransparencyRules {
 		}
 	}
 
-	private static class OpacityProperty implements Callable<Boolean> {
+	private static class OpacityProperty implements Function<Block, Boolean> {
 
-		private final Block block;
 		private final OpacityChecks call;
 
-		private OpacityProperty(Block b, OpacityChecks o) {
+		private OpacityProperty(OpacityChecks o) {
 			call = o;
-			block = b;
 		}
 
 		@Override
-		public Boolean call() throws Exception {
-			return call.evaluate(block);
+		public Boolean apply(Block b) {
+			return call.evaluate(b);
 		}
 
+		@Override
+		public String toString() {
+			return call.name();
+		}
+
+	}
+
+	@Override
+	public Function<Block, Boolean> create(String s) {
+		return new OpacityProperty(OpacityChecks.valueOf(s));
 	}
 
 	public static class TransparencyRule {
@@ -264,6 +285,7 @@ public class TransparencyRules {
 		private TransparencyRule(BlockKey b, boolean def) {
 			block = b;
 			isDefaultOpaque = def;
+			isOpaque = isDefaultOpaque;
 		}
 
 		public boolean isOpaque() {
@@ -272,6 +294,14 @@ public class TransparencyRules {
 
 		public boolean isDefault() {
 			return isOpaque == isDefaultOpaque;
+		}
+
+		@Override
+		public String toString() {
+			String ret = block.toString()+" - "+(this.isOpaque() ? "Opaque" : "Transparent");
+			if (!this.isDefault())
+				ret = ret+" * OVERRIDE";
+			return ret;
 		}
 
 	}

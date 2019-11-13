@@ -6,7 +6,9 @@ import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
@@ -77,7 +79,25 @@ public class RoomTracker {
 	@SideOnly(Side.CLIENT)
 	public Room getActiveRoom() {
 		//this.clear();
+		if (ChunkRoomToggleCommand.dynamicChunkRadius >= 0) {
+			return this.getDynamicChunkRoom(Minecraft.getMinecraft().thePlayer);
+		}
 		return this.getRoomForEntity(Minecraft.getMinecraft().thePlayer);
+	}
+
+	private Room getDynamicChunkRoom(EntityPlayer ep) {
+		int r = ChunkRoomToggleCommand.dynamicChunkRadius;
+		int ry = ChunkRoomToggleCommand.dynamicChunkRadiusY;
+		int x = MathHelper.floor_double(ep.posX) >> 4;
+		int y = MathHelper.floor_double(ep.posY) >> 4;
+		int z = MathHelper.floor_double(ep.posZ) >> 4;
+		int x0 = x-r;
+		int y0 = y-ry;
+		int z0 = z-r;
+		int x1 = x+r;
+		int y1 = y+ry;
+		int z1 = z+r;
+		return new Room(ep.worldObj.provider.dimensionId, new BlockBox(x0, y0, z0, x1, y1, z1));
 	}
 
 	public Room getRoomForEntity(Entity e) {

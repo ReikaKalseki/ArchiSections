@@ -15,6 +15,7 @@ import java.net.URL;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.ClientCommandHandler;
 
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.DragonOptions;
@@ -37,6 +38,7 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -72,7 +74,6 @@ public class ArchiSections extends DragonAPIMod {
 		config.loadSubfolderedConfigFile(evt);
 		config.loadDataFromFile(evt);
 		requireSolidWalls = config.getBoolean("Options", "Require Solid Walls", false);
-		TransparencyRules.instance.loadSettings(config);
 		config.finishReading();
 
 		roomBlock = new RoomBlock();
@@ -88,6 +89,7 @@ public class ArchiSections extends DragonAPIMod {
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		this.startTiming(LoadPhase.LOAD);
+		TransparencyRules.instance.loadSettings(config);
 		GameRegistry.addShapedRecipe(new ItemStack(roomBlock, 2, 0),
 				"rgr", "sis", "srs", 'i', Items.iron_ingot, 's', Blocks.cobblestone, 'r', Items.redstone, 'g', Items.glowstone_dust);
 		this.finishTiming();
@@ -98,7 +100,17 @@ public class ArchiSections extends DragonAPIMod {
 	public void postload(FMLPostInitializationEvent evt) {
 		this.startTiming(LoadPhase.POSTLOAD);
 		TransparencyRules.instance.load();
+
+		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
+			ClientCommandHandler.instance.registerCommand(new ChunkRoomToggleCommand());
+		}
+
 		this.finishTiming();
+	}
+
+	@EventHandler
+	public void registerCommands(FMLServerStartingEvent evt) {
+		evt.registerServerCommand(new DumpOpacityDataCommand());
 	}
 
 	@Override
