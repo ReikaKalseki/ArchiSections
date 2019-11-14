@@ -22,6 +22,7 @@ import Reika.DragonAPI.DragonOptions;
 import Reika.DragonAPI.Auxiliary.Trackers.CommandableUpdateChecker;
 import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
+import Reika.DragonAPI.Extras.ThrottleableEffectRenderer;
 import Reika.DragonAPI.Instantiable.Event.Client.ChunkWorldRenderEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.ClientLogoutEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderEvent;
@@ -103,10 +104,15 @@ public class ArchiSections extends DragonAPIMod {
 		TransparencyRules.instance.load();
 
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-			ClientCommandHandler.instance.registerCommand(new ChunkRoomToggleCommand());
+			this.doClientSetup();
 		}
 
 		this.finishTiming();
+	}
+
+	private void doClientSetup() {
+		ClientCommandHandler.instance.registerCommand(new ChunkRoomToggleCommand());
+		ThrottleableEffectRenderer.getRegisteredInstance().addSpawnHandler(RoomTracker.instance);
 	}
 
 	@EventHandler

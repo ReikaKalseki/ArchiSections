@@ -7,8 +7,8 @@ import Reika.DragonAPI.Command.DragonClientCommand;
 
 public class ChunkRoomToggleCommand extends DragonClientCommand {
 
-	public static int dynamicChunkRadius;
-	public static int dynamicChunkRadiusY;
+	public static int dynamicChunkRadius = -1;
+	public static int dynamicChunkRadiusY = -1;
 
 	@Override
 	public void processCommand(ICommandSender ics, String[] args) {

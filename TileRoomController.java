@@ -86,7 +86,9 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 						default:
 							break;
 					}
+					RoomTracker.instance.forceAllowParticles = true;
 					ReikaParticleHelper.REDSTONE.spawnAt(world, px, py, pz);
+					RoomTracker.instance.forceAllowParticles = false;
 				}
 				d++;
 				dx = x+dir.offsetX*d;

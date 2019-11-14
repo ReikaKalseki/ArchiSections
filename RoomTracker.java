@@ -5,24 +5,28 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
+import Reika.DragonAPI.Extras.ThrottleableEffectRenderer.ParticleSpawnHandler;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
 import Reika.DragonAPI.Instantiable.Data.Immutable.Coordinate;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class RoomTracker {
+public class RoomTracker implements ParticleSpawnHandler {
 
 	public static final RoomTracker instance = new RoomTracker();
 
 	private final HashMap<UUID, Room> rooms = new HashMap();
 	private final HashMap<Coordinate, UUID> cache = new HashMap();
+
+	public boolean forceAllowParticles = false;
 
 	private RoomTracker() {
 		//this.addRoom(new BlockBox(-20, 50, -20, 20, 80, 20));
@@ -143,6 +147,13 @@ public class RoomTracker {
 
 	public Room getRoom(UUID id) {
 		return rooms.get(id);
+	}
+
+	@Override
+	public boolean cancel(EntityFX fx) {
+		if (forceAllowParticles)
+			return false;
+		return !this.isActiveRoom(this.getRoomForEntity(fx));
 	}
 
 }
