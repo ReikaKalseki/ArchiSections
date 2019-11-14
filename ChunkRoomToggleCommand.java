@@ -25,10 +25,12 @@ public class ChunkRoomToggleCommand extends DragonClientCommand {
 		}
 		if (dynamicChunkRadius >= 0) {
 			dynamicChunkRadius = -1;
+			dynamicChunkRadiusY = -1;
 			this.sendChatToSender(ics, "Dynamic chunk room disabled.");
 		}
 		else {
 			dynamicChunkRadius = r;
+			dynamicChunkRadiusY = ry;
 			this.sendChatToSender(ics, "Dynamic chunk room enabled with radius "+r+" chunks horizontal and "+ry+" vertical.");
 		}
 	}

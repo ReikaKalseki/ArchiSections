@@ -11,8 +11,10 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLeavesBase;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import Reika.DragonAPI.Exception.UnreachableCodeException;
@@ -186,12 +188,7 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 	}
 
 	private boolean calculateDefaultOpacity(Block b) {
-		try {
-			return opacityRules.apply(b);
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return opacityRules.apply(b);
 	}
 
 	public TransparencyRule getForBlock(Block b, int meta) {
@@ -218,7 +215,8 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 		ZEROLIGHTOPACITY("Block has zero light opacity"),
 		OPAQUEMATERIAL("Block material is marked as opaque"),
 		AIRMATERIAL("Block has air material type"),
-		LIQUIDMATERIAL("Block has liquid material type");
+		LIQUIDMATERIAL("Block has liquid material type"),
+		ISLEAVES("Block is leaves");
 
 		public final String desc;
 		//private OpacityCondition defaultValue;
@@ -246,6 +244,8 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 					return b.getRenderType() == 0;
 				case ZEROLIGHTOPACITY:
 					return b.getLightOpacity() == 0;
+				case ISLEAVES:
+					return b instanceof BlockLeavesBase;
 			}
 			throw new UnreachableCodeException();
 		}
@@ -298,7 +298,8 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 
 		@Override
 		public String toString() {
-			String ret = block.toString()+" ["+Block.getIdFromBlock(block.blockID)+":"+block.metadata+"] ["+block.getDisplay().getDisplayName()+"] - "+(this.isOpaque() ? "Opaque" : "Transparent");
+			String name = StatCollector.translateToLocal(block.blockID.getLocalizedName());
+			String ret = block.toString()+" ["+Block.getIdFromBlock(block.blockID)+":"+block.metadata+"] ["+name+"] - "+(this.isOpaque() ? "Opaque" : "Transparent");
 			if (!this.isDefault())
 				ret = ret+" * OVERRIDE";
 			return ret;

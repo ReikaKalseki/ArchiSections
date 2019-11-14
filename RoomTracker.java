@@ -93,10 +93,10 @@ public class RoomTracker {
 		int x0 = x-r;
 		int y0 = y-ry;
 		int z0 = z-r;
-		int x1 = x+r;
-		int y1 = y+ry;
-		int z1 = z+r;
-		return new Room(ep.worldObj.provider.dimensionId, new BlockBox(x0, y0, z0, x1, y1, z1));
+		int x1 = x+r+1;
+		int y1 = y+ry+1;
+		int z1 = z+r+1;
+		return new Room(ep.worldObj.provider.dimensionId, new BlockBox(x0 << 4, y0 << 4, z0 << 4, (x1 << 4) - 1, (y1 << 4) - 1, (z1 << 4) - 1));
 	}
 
 	public Room getRoomForEntity(Entity e) {

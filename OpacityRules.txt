@@ -5,16 +5,19 @@ Combination Rules - A block will be opaque if and only if this logical combinati
 			OPAQUECUBE
 			AND = {
 				RENDERTYPEZERO
+				NORMALRENDER
 				FULLLIGHTOPACITY
 			}
 			AND = {
 				RENDERTYPEZERO
+				NORMALRENDER
 				OPAQUEMATERIAL
 			}
 		}
 		NOR = {
 			AIRMATERIAL
 			LIQUIDMATERIAL
+			ISLEAVES
 		}
 	}
 }
@@ -28,6 +31,7 @@ Valid property checks:
 	OPAQUEMATERIAL (Block material is marked as opaque)
 	AIRMATERIAL (Block has air material type)
 	LIQUIDMATERIAL (Block has liquid material type)
+	ISLEAVES (Block is a leaf block)
 	
 Valid logical combinators:
 AND, OR, NOT, XOR, NOR, NAND, XNOR
