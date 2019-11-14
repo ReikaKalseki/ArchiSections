@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.minecraft.command.ICommandSender;
 
 import Reika.DragonAPI.Command.DragonCommandBase;
+import Reika.DragonAPI.Libraries.Java.ReikaJavaLibrary;
 
 
 public class DumpOpacityDataCommand extends DragonCommandBase {
@@ -14,6 +15,7 @@ public class DumpOpacityDataCommand extends DragonCommandBase {
 		ArrayList<String> li = TransparencyRules.instance.getData();
 		for (String s : li) {
 			this.sendChatToSender(ics, s);
+			ReikaJavaLibrary.pConsole(s);
 		}
 	}
 

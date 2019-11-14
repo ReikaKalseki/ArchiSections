@@ -79,6 +79,7 @@ public class ArchiSections extends DragonAPIMod {
 		roomBlock = new RoomBlock();
 		GameRegistry.registerBlock(roomBlock, "room");
 		LanguageRegistry.addName(roomBlock, "Room Controller");
+		GameRegistry.registerTileEntity(TileRoomController.class, "RoomController");
 
 		FMLCommonHandler.instance().bus().register(this);
 		this.basicSetup(evt);

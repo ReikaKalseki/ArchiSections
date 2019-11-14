@@ -298,7 +298,7 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 
 		@Override
 		public String toString() {
-			String ret = block.toString()+" - "+(this.isOpaque() ? "Opaque" : "Transparent");
+			String ret = block.toString()+" ["+Block.getIdFromBlock(block.blockID)+":"+block.metadata+"] ["+block.getDisplay().getDisplayName()+"] - "+(this.isOpaque() ? "Opaque" : "Transparent");
 			if (!this.isDefault())
 				ret = ret+" * OVERRIDE";
 			return ret;

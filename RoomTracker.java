@@ -79,13 +79,12 @@ public class RoomTracker {
 	@SideOnly(Side.CLIENT)
 	public Room getActiveRoom() {
 		//this.clear();
-		if (ChunkRoomToggleCommand.dynamicChunkRadius >= 0) {
-			return this.getDynamicChunkRoom(Minecraft.getMinecraft().thePlayer);
-		}
 		return this.getRoomForEntity(Minecraft.getMinecraft().thePlayer);
 	}
 
-	private Room getDynamicChunkRoom(EntityPlayer ep) {
+	@SideOnly(Side.CLIENT)
+	private Room getDynamicChunkRoom() {
+		EntityPlayer ep = Minecraft.getMinecraft().thePlayer;
 		int r = ChunkRoomToggleCommand.dynamicChunkRadius;
 		int ry = ChunkRoomToggleCommand.dynamicChunkRadiusY;
 		int x = MathHelper.floor_double(ep.posX) >> 4;
@@ -109,12 +108,19 @@ public class RoomTracker {
 	}
 
 	public Room getRoomForPos(int dim, double x, double y, double z) {
+		Vec3 pos = Vec3.createVectorHelper(x, y, z);
+		if (ChunkRoomToggleCommand.dynamicChunkRadius >= 0) {
+			Room r = this.getDynamicChunkRoom();
+			if (r.dimensionID == dim && r.bounds.isVecInside(pos)) {
+				return r;
+			}
+		}
 		Iterator<Room> it = rooms.values().iterator();
 		while (it.hasNext()) {
 			Room r = it.next();
 			if (r.dimensionID == dim) {
 				if (r.isValid()) {
-					if (r.bounds.isVecInside(Vec3.createVectorHelper(x, y, z))) {
+					if (r.bounds.isVecInside(pos)) {
 						return r;
 					}
 				}
