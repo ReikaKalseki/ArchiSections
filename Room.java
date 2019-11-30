@@ -95,6 +95,10 @@ public class Room {
 		return te instanceof TileRoomController ? (TileRoomController)te : null;
 	}
 
+	public Coordinate getControllerLocation() {
+		return controller;
+	}
+
 	public boolean isValid() {
 		return this.getController() != null;
 	}

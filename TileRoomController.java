@@ -29,8 +29,13 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 
 	@Override
 	public void updateEntity(World world, int x, int y, int z, int meta) {
-		if (!world.isRemote && bounds == null) {
-			this.getDimensions(world, x, y, z);
+		if (!world.isRemote && this.getTicksExisted()%8 == 0) {
+			if (bounds == null) {
+				this.getDimensions(world, x, y, z);
+			}
+			else if (this.getTicksExisted()%128 == 0) {
+				this.validate(world);
+			}
 		}
 		if (world.isRemote && bounds != null && (ticksSinceRoomSet < 40 || this.hasRedstoneSignal())) {
 			this.doParticles(world, x, y, z);
@@ -101,6 +106,7 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	private void getDimensions(World world, int x, int y, int z) {
 		if (world.isRemote)
 			return;
+		bounds = null;
 		int[] dists = new int[6];
 		for (int i = 0; i < 6; i++) {
 			dists[i] = MAX_SIZE;
@@ -124,10 +130,55 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 		int maxy = y+1+dists[ForgeDirection.UP.ordinal()];
 		int maxz = z+1+dists[ForgeDirection.SOUTH.ordinal()];
 		bounds = new BlockBox(minx, miny, minz, maxx, maxy, maxz);
-		if (world.isRemote)
+		if (ArchiSections.requireSolidWalls) {
+			if (!this.checkForSolidWalls(world)) {
+				bounds = null;
+			}
+		}
+		if (world.isRemote) {
+			this.assignRoom();
+		}
+		else {
+			this.triggerBlockUpdate();
+		}
+	}
+
+	private void assignRoom() {
+		if (bounds != null)
 			RoomTracker.instance.addRoom(this, bounds);
 		else
-			this.triggerBlockUpdate();
+			RoomTracker.instance.removeRoom(this);
+	}
+
+	private boolean checkForSolidWalls(World world) {
+		BlockBox box2 = bounds.contract(1, 1, 1);
+		for (int x = bounds.minX; x <= bounds.maxX; x++) {
+			for (int y = bounds.minY; y <= bounds.maxY; y++) {
+				for (int z = bounds.minZ; z <= bounds.maxZ; z++) {
+					if (box2.isBlockInside(x, y, z))
+						continue;
+					if (y == bounds.minY || y == bounds.maxY) {
+						if (x == bounds.minX || x == bounds.maxX)
+							continue;
+						if (z == bounds.minZ || z == bounds.maxZ)
+							continue;
+					}
+					if (x == bounds.minX || x == bounds.maxX) {
+						if (z == bounds.minZ || z == bounds.maxZ)
+							continue;
+					}
+					//ReikaJavaLibrary.pConsole(x+","+y+","+z);
+					if (!TransparencyRules.instance.isOpaqueForRoom(world, x, y, z)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private void validate(World world) {
+		this.getDimensions(world, xCoord, yCoord, zCoord);
 	}
 
 	public void setRoom(Room r) {
@@ -149,12 +200,13 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	@Override
 	protected void readSyncTag(NBTTagCompound NBT) {
 		super.readSyncTag(NBT);
+		bounds = null;
 		if (NBT.hasKey("room")) {
 			NBTTagCompound tag = NBT.getCompoundTag("room");
 			bounds = BlockBox.readFromNBT(tag);
-			if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
-				RoomTracker.instance.addRoom(this, bounds);
 		}
+		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
+			this.assignRoom();
 	}
 
 	@Override

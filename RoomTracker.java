@@ -65,6 +65,10 @@ public class RoomTracker implements ParticleSpawnHandler {
 		this.removeRoom(r.id);
 	}
 
+	public void removeRoom(TileRoomController te) {
+		this.removeRoom(cache.get(new Coordinate(te)));
+	}
+
 	public void removeRoom(UUID id) {
 		Room r = rooms.remove(id);
 		if (r != null) {
@@ -142,7 +146,10 @@ public class RoomTracker implements ParticleSpawnHandler {
 	}
 
 	private void recalculateRoomCache() {
-
+		cache.clear();
+		for (Room r : rooms.values()) {
+			cache.put(r.getControllerLocation(), r.id);
+		}
 	}
 
 	public Room getRoom(UUID id) {
