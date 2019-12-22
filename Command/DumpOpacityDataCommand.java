@@ -1,9 +1,10 @@
-package Reika.ArchiSections;
+package Reika.ArchiSections.Command;
 
 import java.util.ArrayList;
 
 import net.minecraft.command.ICommandSender;
 
+import Reika.ArchiSections.Control.TransparencyRules;
 import Reika.DragonAPI.Command.DragonCommandBase;
 import Reika.DragonAPI.Libraries.Java.ReikaJavaLibrary;
 

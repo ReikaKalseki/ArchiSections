@@ -1,4 +1,4 @@
-package Reika.ArchiSections;
+package Reika.ArchiSections.Control;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +17,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
+import Reika.ArchiSections.ArchiSections;
 import Reika.DragonAPI.Exception.UnreachableCodeException;
 import Reika.DragonAPI.IO.ReikaFileReader;
 import Reika.DragonAPI.Instantiable.LogicalCombination;

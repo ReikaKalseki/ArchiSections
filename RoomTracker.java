@@ -12,6 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
+import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
 import Reika.DragonAPI.Extras.ThrottleableEffectRenderer.ParticleSpawnHandler;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
 import Reika.DragonAPI.Instantiable.Data.Immutable.Coordinate;

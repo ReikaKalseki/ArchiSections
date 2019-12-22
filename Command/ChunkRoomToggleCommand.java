@@ -1,4 +1,4 @@
-package Reika.ArchiSections;
+package Reika.ArchiSections.Command;
 
 import net.minecraft.command.ICommandSender;
 

@@ -17,6 +17,9 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.ClientCommandHandler;
 
+import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
+import Reika.ArchiSections.Command.DumpOpacityDataCommand;
+import Reika.ArchiSections.Control.TransparencyRules;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.DragonOptions;
 import Reika.DragonAPI.Auxiliary.Trackers.CommandableUpdateChecker;
