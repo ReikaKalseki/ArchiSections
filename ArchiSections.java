@@ -81,7 +81,7 @@ public class ArchiSections extends DragonAPIMod {
 		config.finishReading();
 
 		roomBlock = new RoomBlock();
-		GameRegistry.registerBlock(roomBlock, "room");
+		GameRegistry.registerBlock(roomBlock, ItemBlockRoomBlock.class, "room");
 		LanguageRegistry.addName(roomBlock, "Room Controller");
 		GameRegistry.registerTileEntity(TileRoomController.class, "RoomController");
 
@@ -97,6 +97,8 @@ public class ArchiSections extends DragonAPIMod {
 		TransparencyRules.instance.loadSettings(config);
 		GameRegistry.addShapedRecipe(new ItemStack(roomBlock, 2, 0),
 				"rgr", "sis", "srs", 'i', Items.iron_ingot, 's', Blocks.cobblestone, 'r', Items.redstone, 'g', Items.glowstone_dust);
+		GameRegistry.addShapelessRecipe(new ItemStack(roomBlock, 1, 1), new ItemStack(roomBlock, 1, 0));
+		GameRegistry.addShapelessRecipe(new ItemStack(roomBlock, 1, 0), new ItemStack(roomBlock, 1, 1));
 		this.finishTiming();
 	}
 

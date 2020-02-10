@@ -205,7 +205,12 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 		int meta = world.getBlockMetadata(x, y, z);
 		if (b.isAir(world, x, y, z) || ReikaWorldHelper.softBlocks(world, x, y, z))
 			return false;
-		return this.getForBlock(b, meta).isOpaque();
+		TransparencyRule tr = this.getForBlock(b, meta);
+		if (tr == null) {
+			ArchiSections.logger.logError("Block "+b+" with meta "+meta+" has null transparency rule!");
+			return false;
+		}
+		return tr.isOpaque();
 	}
 
 	private static enum OpacityChecks {
