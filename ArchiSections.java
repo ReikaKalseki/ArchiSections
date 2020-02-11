@@ -12,10 +12,12 @@ package Reika.ArchiSections;
 import java.io.File;
 import java.net.URL;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 
 import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
 import Reika.ArchiSections.Command.DumpOpacityDataCommand;
@@ -64,6 +66,7 @@ public class ArchiSections extends DragonAPIMod {
 	public static RoomBlock roomBlock;
 
 	public static boolean requireSolidWalls;
+	public static boolean interceptSounds;
 
 	@Override
 	@EventHandler
@@ -78,6 +81,7 @@ public class ArchiSections extends DragonAPIMod {
 		config.loadSubfolderedConfigFile(evt);
 		config.loadDataFromFile(evt);
 		requireSolidWalls = config.getBoolean("Options", "Require Solid Walls", false);
+		interceptSounds = config.getBoolean("Options", "Intercept Sounds", false);
 		config.finishReading();
 
 		roomBlock = new RoomBlock();
@@ -158,6 +162,19 @@ public class ArchiSections extends DragonAPIMod {
 	@Override
 	public File getConfigFolder() {
 		return config.getConfigFolder();
+	}
+
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void interceptSound(PlaySoundEvent17 evt) {
+		if (!interceptSounds)
+			return;
+		if (Minecraft.getMinecraft().theWorld == null)
+			return;
+		Room r = RoomTracker.instance.getRoomForPos(Minecraft.getMinecraft().theWorld.provider.dimensionId, evt.sound.getXPosF(), evt.sound.getYPosF(), evt.sound.getZPosF());
+		if (!RoomTracker.instance.isActiveRoom(r)) {
+			evt.result = null;
+		}
 	}
 
 	@SubscribeEvent
