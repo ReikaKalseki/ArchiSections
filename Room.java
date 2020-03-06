@@ -9,6 +9,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 
+import Reika.ArchiSections.Control.RoomSettings;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
 import Reika.DragonAPI.Instantiable.Data.Immutable.Coordinate;
 
@@ -22,6 +23,8 @@ public class Room {
 	private final HashSet<Coordinate> chunkSet = new HashSet();
 
 	private Coordinate controller;
+
+	private RoomSettings settings = new RoomSettings();
 
 	Room(int dim, BlockBox box) {
 		this(dim, UUID.randomUUID(), box);
@@ -94,11 +97,18 @@ public class Room {
 
 	void setController(TileRoomController te) {
 		controller = new Coordinate(te);
+		settings = te.getSettings();
 	}
 
 	public TileRoomController getController() {
 		TileEntity te = controller != null ? controller.getTileEntity(Minecraft.getMinecraft().theWorld) : null;
 		return te instanceof TileRoomController ? (TileRoomController)te : null;
+	}
+
+	public void reloadSettings() {
+		TileRoomController te = this.getController();
+		if (te != null)
+			settings = te.getSettings();
 	}
 
 	public Coordinate getControllerLocation() {
@@ -107,6 +117,10 @@ public class Room {
 
 	public boolean isValid() {
 		return this.getController() != null;
+	}
+
+	public RoomSettings getSettings() {
+		return settings;
 	}
 
 }

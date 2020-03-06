@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 
 import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
 import Reika.DragonAPI.Extras.ThrottleableEffectRenderer.ParticleSpawnHandler;
@@ -108,11 +109,13 @@ public class RoomTracker implements ParticleSpawnHandler {
 		return new Room(ep.worldObj.provider.dimensionId, new BlockBox(x0 << 4, y0 << 4, z0 << 4, (x1 << 4) - 1, (y1 << 4) - 1, (z1 << 4) - 1));
 	}
 
-	public Room getRoomForEntity(Entity e) {
+	@Deprecated
+	private Room getRoomForEntity(Entity e) {
 		return this.getRoomForPos(e.worldObj.provider.dimensionId, e.posX, e.posY, e.posZ);
 	}
 
-	public Room getRoomForTile(TileEntity e) {
+	@Deprecated
+	private Room getRoomForTile(TileEntity e) {
 		return this.getRoomForPos(e.worldObj.provider.dimensionId, e.xCoord, e.yCoord, e.zCoord);
 	}
 
@@ -144,6 +147,24 @@ public class RoomTracker implements ParticleSpawnHandler {
 	public boolean isActiveRoom(Room r) {
 		Room act = this.getActiveRoom();
 		return act == null ? r == null : act.equals(r);
+	}
+
+	public boolean isInActiveRoom(TileEntity e) {
+		return this.isInActiveRoom(e.worldObj, e.xCoord, e.yCoord, e.zCoord);
+	}
+
+	public boolean isInActiveRoom(Entity e) {
+		return this.isInActiveRoom(e.worldObj, e.posX, e.posY, e.posZ);
+	}
+
+	public boolean isInActiveRoom(World world, double x, double y, double z) {
+		Room act = this.getActiveRoom();
+		if (act != null) {
+			return act.dimensionID == world.provider.dimensionId && act.bounds.isVecInside(Vec3.createVectorHelper(x, y, z));
+		}
+		else {
+			return this.getRoomForPos(world.provider.dimensionId, x, y, z) == null;
+		}
 	}
 
 	private void recalculateRoomCache() {

@@ -205,8 +205,7 @@ public class ArchiSections extends DragonAPIMod {
 			return;
 		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
 			return;
-		Room r = RoomTracker.instance.getRoomForTile(evt.tileEntity);
-		if (!RoomTracker.instance.isActiveRoom(r))
+		if (!RoomTracker.instance.isInActiveRoom(evt.tileEntity))
 			evt.setCanceled(true);
 	}
 
@@ -219,8 +218,7 @@ public class ArchiSections extends DragonAPIMod {
 			return;
 		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
 			return;
-		Room r = RoomTracker.instance.getRoomForEntity(evt.entity);
-		if (!RoomTracker.instance.isActiveRoom(r))
+		if (!RoomTracker.instance.isInActiveRoom(evt.entity))
 			evt.setCanceled(true);
 	}
 

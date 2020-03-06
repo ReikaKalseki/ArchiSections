@@ -5,6 +5,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import Reika.ArchiSections.Control.RoomSettings;
 import Reika.ArchiSections.Control.TransparencyRules;
 import Reika.DragonAPI.Base.TileEntityBase;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
@@ -22,6 +23,8 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	private BlockBox bounds;
 	private int ticksSinceRoomSet;
 	//private UUID currentRoom;
+
+	private final RoomSettings settings = new RoomSettings();
 
 	@Override
 	public boolean allowTickAcceleration() {
@@ -197,6 +200,10 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 			bounds.writeToNBT(tag);
 			NBT.setTag("room", tag);
 		}
+
+		NBTTagCompound tag = new NBTTagCompound();
+		settings.writeToNBT(tag);
+		NBT.setTag("settings", tag);
 	}
 
 	@Override
@@ -207,8 +214,22 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 			NBTTagCompound tag = NBT.getCompoundTag("room");
 			bounds = BlockBox.readFromNBT(tag);
 		}
+
+		NBTTagCompound tag = NBT.getCompoundTag("settings");
+		settings.readFromNBT(tag);
+
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
 			this.assignRoom();
+	}
+
+	@Override
+	public void writeToNBT(NBTTagCompound NBT) {
+		super.writeToNBT(NBT);
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound NBT) {
+		super.readFromNBT(NBT);
 	}
 
 	@Override
@@ -246,6 +267,10 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	public boolean onRightClick(World world, int x, int y, int z, ForgeDirection side) {
 		this.getDimensions(world, x, y, z);
 		return true;
+	}
+
+	public RoomSettings getSettings() {
+		return settings;
 	}
 
 }
