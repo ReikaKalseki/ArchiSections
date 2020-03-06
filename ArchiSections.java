@@ -13,6 +13,7 @@ import java.io.File;
 import java.net.URL;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -67,6 +68,9 @@ public class ArchiSections extends DragonAPIMod {
 
 	public static boolean requireSolidWalls;
 	public static boolean interceptSounds;
+	public static int chunkBufferXZ;
+	public static int chunkBufferY;
+	public static boolean disableOnSneak;
 
 	@Override
 	@EventHandler
@@ -82,6 +86,9 @@ public class ArchiSections extends DragonAPIMod {
 		config.loadDataFromFile(evt);
 		requireSolidWalls = config.getBoolean("Options", "Require Solid Walls", false);
 		interceptSounds = config.getBoolean("Options", "Intercept Sounds", false);
+		disableOnSneak = config.getBoolean("Options", "Cancel (Tile)Entity Culling if Sneaking", true);
+		chunkBufferXZ = config.getInteger("Options", "Chunk Derendering Buffer (Horizontal)", 0);
+		chunkBufferY = config.getInteger("Options", "Chunk Derendering Buffer (Vertical)", 0);
 		config.finishReading();
 
 		roomBlock = new RoomBlock();
@@ -193,8 +200,10 @@ public class ArchiSections extends DragonAPIMod {
 
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
-	public void interceptTileRender(TileEntityRenderEvent evt) {
+	public void interceptTileRender(TileEntityRenderEvent.Pre evt) {
 		if (evt.tileEntity.worldObj == null || StructureRenderer.isRenderingTiles())
+			return;
+		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
 			return;
 		Room r = RoomTracker.instance.getRoomForTile(evt.tileEntity);
 		if (!RoomTracker.instance.isActiveRoom(r))
@@ -205,6 +214,10 @@ public class ArchiSections extends DragonAPIMod {
 	@SideOnly(Side.CLIENT)
 	public void interceptEntityRender(EntityRenderEvent evt) {
 		if (evt.entity.worldObj == null)
+			return;
+		if (evt.entity instanceof EntityItem)
+			return;
+		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
 			return;
 		Room r = RoomTracker.instance.getRoomForEntity(evt.entity);
 		if (!RoomTracker.instance.isActiveRoom(r))

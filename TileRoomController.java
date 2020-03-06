@@ -105,8 +105,6 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	}
 
 	private void getDimensions(World world, int x, int y, int z) {
-		if (world.isRemote)
-			return;
 		BlockBox old = bounds;
 		bounds = null;
 		int[] dists = new int[6];

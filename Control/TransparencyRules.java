@@ -168,15 +168,19 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 	public void load() {
 		for (Object k : Block.blockRegistry.getKeys()) {
 			Block b = (Block)Block.blockRegistry.getObject(k);
-			boolean def = this.calculateDefaultOpacity(b);
-			for (int i = 0; i < 16; i++) {
-				BlockKey bk = new BlockKey(b, i);
-				TransparencyRule tr = new TransparencyRule(bk, def);
-				Boolean override = overrides.get(bk);
-				if (override != null)
-					tr.isOpaque = override.booleanValue();
-				data.put(bk, tr);
-			}
+			this.calculateForBlock(b);
+		}
+	}
+
+	private void calculateForBlock(Block b) {
+		boolean def = this.calculateDefaultOpacity(b);
+		for (int i = 0; i < 16; i++) {
+			BlockKey bk = new BlockKey(b, i);
+			TransparencyRule tr = new TransparencyRule(bk, def);
+			Boolean override = overrides.get(bk);
+			if (override != null)
+				tr.isOpaque = override.booleanValue();
+			data.put(bk, tr);
 		}
 	}
 
@@ -208,7 +212,8 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 		TransparencyRule tr = this.getForBlock(b, meta);
 		if (tr == null) {
 			ArchiSections.logger.logError("Block "+b+" with meta "+meta+" has null transparency rule!");
-			return false;
+			this.calculateForBlock(b);
+			return true;
 		}
 		return tr.isOpaque();
 	}

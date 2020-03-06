@@ -39,6 +39,12 @@ public class Room {
 		int y1 = volume.maxY >> 4;
 		int z0 = volume.minZ >> 4;
 		int z1 = volume.maxZ >> 4;
+		x0 -= ArchiSections.chunkBufferXZ;
+		y0 -= ArchiSections.chunkBufferY;
+		z0 -= ArchiSections.chunkBufferXZ;
+		x1 += ArchiSections.chunkBufferXZ;
+		y1 += ArchiSections.chunkBufferY;
+		z1 += ArchiSections.chunkBufferXZ;
 		for (int x = x0; x <= x1; x++) {
 			for (int y = y0; y <= y1; y++) {
 				for (int z = z0; z <= z1; z++) {

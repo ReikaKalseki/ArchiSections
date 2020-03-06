@@ -109,6 +109,11 @@ public class RoomBlock extends BlockTEBase {
 	}
 
 	@Override
+	public final void setBlockBoundsForItemRender() {
+		this.setFullBlockBounds();
+	}
+
+	@Override
 	public final void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z) {
 		AxisAlignedBB box = this.getBoundingBox(world, x, y, z);
 		this.setBounds(box, x, y, z);
