@@ -22,6 +22,7 @@ import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 
 import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
 import Reika.ArchiSections.Command.DumpOpacityDataCommand;
+import Reika.ArchiSections.Control.CullingTypes;
 import Reika.ArchiSections.Control.TransparencyRules;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.DragonOptions;
@@ -192,6 +193,8 @@ public class ArchiSections extends DragonAPIMod {
 
 		}
 		else {
+			if (!r.getSettings().isCulling(CullingTypes.CHUNK))
+				return;
 			if (!r.contains(evt.renderer)) {
 				evt.setCanceled(true);
 			}

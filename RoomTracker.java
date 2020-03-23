@@ -14,6 +14,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
+import Reika.ArchiSections.Control.CullingTypes;
 import Reika.DragonAPI.Extras.ThrottleableEffectRenderer.ParticleSpawnHandler;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
 import Reika.DragonAPI.Instantiable.Data.Immutable.Coordinate;
@@ -150,16 +151,18 @@ public class RoomTracker implements ParticleSpawnHandler {
 	}
 
 	public boolean isInActiveRoom(TileEntity e) {
-		return this.isInActiveRoom(e.worldObj, e.xCoord, e.yCoord, e.zCoord);
+		return this.isInActiveRoom(e.worldObj, e.xCoord, e.yCoord, e.zCoord, CullingTypes.TILE);
 	}
 
 	public boolean isInActiveRoom(Entity e) {
-		return this.isInActiveRoom(e.worldObj, e.posX, e.posY, e.posZ);
+		return this.isInActiveRoom(e.worldObj, e.posX, e.posY, e.posZ, CullingTypes.ENTITY);
 	}
 
-	public boolean isInActiveRoom(World world, double x, double y, double z) {
+	public boolean isInActiveRoom(World world, double x, double y, double z, CullingTypes type) {
 		Room act = this.getActiveRoom();
 		if (act != null) {
+			if (!act.getSettings().isCulling(type))
+				return true;
 			return act.dimensionID == world.provider.dimensionId && act.bounds.isVecInside(Vec3.createVectorHelper(x, y, z));
 		}
 		else {

@@ -30,6 +30,7 @@ import Reika.DragonAPI.Libraries.Java.ReikaJavaLibrary;
 import Reika.DragonAPI.Libraries.Java.ReikaStringParser;
 import Reika.DragonAPI.Libraries.Logic.LogicalOperators;
 import Reika.DragonAPI.Libraries.World.ReikaWorldHelper;
+import Reika.DragonAPI.ModRegistry.InterfaceCache;
 
 public class TransparencyRules implements EvaluatorConstructor<Block> {
 
@@ -227,7 +228,8 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 		OPAQUEMATERIAL("Block material is marked as opaque"),
 		AIRMATERIAL("Block has air material type"),
 		LIQUIDMATERIAL("Block has liquid material type"),
-		ISLEAVES("Block is leaves");
+		ISLEAVES("Block is leaves"),
+		ISPIPE("Block is pipe/conduit/cable/duct");
 
 		public final String desc;
 		//private OpacityCondition defaultValue;
@@ -257,6 +259,8 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 					return b.getLightOpacity() == 0;
 				case ISLEAVES:
 					return b instanceof BlockLeavesBase;
+				case ISPIPE:
+					return InterfaceCache.BCPIPEBLOCK.instanceOf(b) || InterfaceCache.TDDUCTBLOCK.instanceOf(b) || InterfaceCache.AECABLEBLOCK.instanceOf(b) || InterfaceCache.EIOCONDUITBLOCK.instanceOf(b);
 			}
 			throw new UnreachableCodeException();
 		}

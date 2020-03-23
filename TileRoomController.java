@@ -215,8 +215,10 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 			bounds = BlockBox.readFromNBT(tag);
 		}
 
-		NBTTagCompound tag = NBT.getCompoundTag("settings");
-		settings.readFromNBT(tag);
+		if (NBT.hasKey("settings")) {
+			NBTTagCompound tag = NBT.getCompoundTag("settings");
+			settings.readFromNBT(tag);
+		}
 
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
 			this.assignRoom();

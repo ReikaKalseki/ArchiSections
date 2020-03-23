@@ -32,6 +32,7 @@ Valid property checks:
 	AIRMATERIAL (Block has air material type)
 	LIQUIDMATERIAL (Block has liquid material type)
 	ISLEAVES (Block is a leaf block)
+	ISPIPE (Block is pipe/conduit/cable/duct)
 	
 Valid logical combinators:
 AND, OR, NOT, XOR, NOR, NAND, XNOR
