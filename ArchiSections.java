@@ -33,6 +33,7 @@ import Reika.DragonAPI.Extras.ThrottleableEffectRenderer;
 import Reika.DragonAPI.Instantiable.Event.Client.ChunkWorldRenderEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.ClientLogoutEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderEvent;
+import Reika.DragonAPI.Instantiable.Event.Client.RenderItemStackEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.SinglePlayerLogoutEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.TileEntityRenderEvent;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
@@ -206,6 +207,8 @@ public class ArchiSections extends DragonAPIMod {
 	public void interceptTileRender(TileEntityRenderEvent.Pre evt) {
 		if (evt.tileEntity.worldObj == null || StructureRenderer.isRenderingTiles())
 			return;
+		if (RenderItemStackEvent.runningItemRender) //for items which call TESRs or entity renders
+			return;
 		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
 			return;
 		if (!RoomTracker.instance.isInActiveRoom(evt.tileEntity))
@@ -218,6 +221,8 @@ public class ArchiSections extends DragonAPIMod {
 		if (evt.entity.worldObj == null)
 			return;
 		if (evt.entity instanceof EntityItem)
+			return;
+		if (RenderItemStackEvent.runningItemRender) //for items which call TESRs or entity renders
 			return;
 		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
 			return;
