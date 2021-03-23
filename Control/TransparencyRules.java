@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -57,7 +58,7 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 			}
 			LuaBlockDatabase data = new LuaBlockDatabase();
 			data.hasDuplicateKeys = true;
-			ArrayList<String> li = ReikaFileReader.getFileAsLines(f, true);
+			ArrayList<String> li = ReikaFileReader.getFileAsLines(f, true, Charset.defaultCharset());
 			li.remove(0);
 			String s = li.remove(li.size()-1);
 			while (s.isEmpty() || s.charAt(0) != '=') {
