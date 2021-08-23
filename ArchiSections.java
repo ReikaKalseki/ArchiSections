@@ -13,6 +13,7 @@ import java.io.File;
 import java.net.URL;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -31,6 +32,7 @@ import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
 import Reika.DragonAPI.Extras.ThrottleableEffectRenderer;
 import Reika.DragonAPI.Instantiable.Event.Client.ChunkWorldRenderEvent;
+import Reika.DragonAPI.Instantiable.Event.Client.ChunkWorldRenderEvent.ChunkWorldRenderWatcher;
 import Reika.DragonAPI.Instantiable.Event.Client.ClientLogoutEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.RenderItemStackEvent;
@@ -57,7 +59,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 @Mod( modid = "ArchiSections", name="ArchiSections", version = "v@MAJOR_VERSION@@MINOR_VERSION@", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI")
 
-public class ArchiSections extends DragonAPIMod {
+public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatcher {
 
 	@Instance("ArchiSections")
 	public static ArchiSections instance = new ArchiSections();
@@ -99,6 +101,7 @@ public class ArchiSections extends DragonAPIMod {
 		GameRegistry.registerTileEntity(TileRoomController.class, "RoomController");
 
 		FMLCommonHandler.instance().bus().register(this);
+		ChunkWorldRenderEvent.addHandler(this);
 		this.basicSetup(evt);
 		this.finishTiming();
 	}
@@ -154,6 +157,11 @@ public class ArchiSections extends DragonAPIMod {
 	}
 
 	@Override
+	public URL getBugSite() {
+		return DragonAPICore.getReikaGithubPage();
+	}
+
+	@Override
 	public String getWiki() {
 		return null;
 	}
@@ -186,20 +194,24 @@ public class ArchiSections extends DragonAPIMod {
 		}
 	}
 
-	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
-	public void interceptChunkRender(ChunkWorldRenderEvent evt) {
+	public boolean interceptChunkRender(WorldRenderer wr, int renderPass, int GLListID) {
 		Room r = RoomTracker.instance.getActiveRoom();
 		if (r == null) { //do not bother culling if you are not in a room
 
 		}
 		else {
 			if (!r.getSettings().isCulling(CullingTypes.CHUNK))
-				return;
-			if (!r.contains(evt.renderer)) {
-				evt.setCanceled(true);
+				return false;
+			if (!r.contains(wr)) {
+				return true;
 			}
 		}
+		return false;
+	}
+
+	public int chunkRenderSortIndex() {
+		return 0;
 	}
 
 	@SubscribeEvent

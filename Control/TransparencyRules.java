@@ -195,7 +195,14 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 	}
 
 	private boolean calculateDefaultOpacity(Block b) {
-		return opacityRules.apply(b);
+		try {
+			return opacityRules.apply(b);
+		}
+		catch (Exception e) {
+			ArchiSections.logger.logError("Block "+b+" threw exception computing transparency rule!");
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public TransparencyRule getForBlock(Block b, int meta) {
@@ -277,7 +284,12 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 
 		@Override
 		public Boolean apply(Block b) {
-			return call.evaluate(b);
+			try {
+				return call.evaluate(b);
+			}
+			catch (Exception e) {
+				throw new RuntimeException("Error thrown when checking "+call+" property of block "+b, e);
+			}
 		}
 
 		@Override
