@@ -22,6 +22,7 @@ import Reika.DragonAPI.Instantiable.Data.Immutable.Coordinate;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class RoomTracker implements ParticleSpawnHandler {
 
 	public static final RoomTracker instance = new RoomTracker();

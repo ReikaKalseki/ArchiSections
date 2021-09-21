@@ -131,6 +131,7 @@ public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatch
 		this.finishTiming();
 	}
 
+	@SideOnly(Side.CLIENT)
 	private void doClientSetup() {
 		ClientCommandHandler.instance.registerCommand(new ChunkRoomToggleCommand());
 		ThrottleableEffectRenderer.getRegisteredInstance().addSpawnHandler(RoomTracker.instance);
@@ -249,6 +250,7 @@ public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatch
 	}
 
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void clearCache(ClientDisconnectionFromServerEvent evt) {
 		RoomTracker.instance.clear();
 	}

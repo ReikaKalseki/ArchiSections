@@ -14,6 +14,7 @@ import Reika.RotaryCraft.API.Interfaces.Screwdriverable;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 
 public class TileRoomController extends TileEntityBase implements Screwdriverable {
@@ -57,6 +58,7 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 		this.getDimensions(worldObj, xCoord, yCoord, zCoord);
 	}
 
+	@SideOnly(Side.CLIENT)
 	private void doParticles(World world, int x, int y, int z) {
 		double f = (this.getTileEntityAge()%20)/20D;
 		for (int i = 0; i < 6; i++) {
@@ -148,6 +150,7 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 		}
 	}
 
+	@SideOnly(Side.CLIENT)
 	private void assignRoom() {
 		if (bounds != null)
 			RoomTracker.instance.addRoom(this, bounds);
