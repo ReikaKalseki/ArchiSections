@@ -101,9 +101,16 @@ public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatch
 		GameRegistry.registerTileEntity(TileRoomController.class, "RoomController");
 
 		FMLCommonHandler.instance().bus().register(this);
-		ChunkWorldRenderEvent.addHandler(this);
+		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
+			this.clientInit();
+		}
 		this.basicSetup(evt);
 		this.finishTiming();
+	}
+
+	@SideOnly(Side.CLIENT)
+	private void clientInit() {
+		ChunkWorldRenderEvent.addHandler(this);
 	}
 
 	@Override
