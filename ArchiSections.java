@@ -13,7 +13,6 @@ import java.io.File;
 import java.net.URL;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -23,7 +22,6 @@ import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 
 import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
 import Reika.ArchiSections.Command.DumpOpacityDataCommand;
-import Reika.ArchiSections.Control.CullingTypes;
 import Reika.ArchiSections.Control.TransparencyRules;
 import Reika.DragonAPI.DragonAPICore;
 import Reika.DragonAPI.DragonOptions;
@@ -32,7 +30,6 @@ import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
 import Reika.DragonAPI.Extras.ThrottleableEffectRenderer;
 import Reika.DragonAPI.Instantiable.Event.Client.ChunkWorldRenderEvent;
-import Reika.DragonAPI.Instantiable.Event.Client.ChunkWorldRenderEvent.ChunkWorldRenderWatcher;
 import Reika.DragonAPI.Instantiable.Event.Client.ClientLogoutEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderEvent;
 import Reika.DragonAPI.Instantiable.Event.Client.RenderItemStackEvent;
@@ -59,7 +56,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 @Mod( modid = "ArchiSections", name="ArchiSections", version = "v@MAJOR_VERSION@@MINOR_VERSION@", certificateFingerprint = "@GET_FINGERPRINT@", dependencies="required-after:DragonAPI")
 
-public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatcher {
+public class ArchiSections extends DragonAPIMod {
 
 	@Instance("ArchiSections")
 	public static ArchiSections instance = new ArchiSections();
@@ -101,16 +98,8 @@ public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatch
 		GameRegistry.registerTileEntity(TileRoomController.class, "RoomController");
 
 		FMLCommonHandler.instance().bus().register(this);
-		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-			this.clientInit();
-		}
 		this.basicSetup(evt);
 		this.finishTiming();
-	}
-
-	@SideOnly(Side.CLIENT)
-	private void clientInit() {
-		ChunkWorldRenderEvent.addHandler(this);
 	}
 
 	@Override
@@ -142,6 +131,7 @@ public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatch
 	private void doClientSetup() {
 		ClientCommandHandler.instance.registerCommand(new ChunkRoomToggleCommand());
 		ThrottleableEffectRenderer.getRegisteredInstance().addSpawnHandler(RoomTracker.instance);
+		ChunkWorldRenderEvent.addHandler(ChunkRenderIntercept.instance);
 	}
 
 	@EventHandler
@@ -200,26 +190,6 @@ public class ArchiSections extends DragonAPIMod implements ChunkWorldRenderWatch
 		if (!RoomTracker.instance.isActiveRoom(r)) {
 			evt.result = null;
 		}
-	}
-
-	@SideOnly(Side.CLIENT)
-	public boolean interceptChunkRender(WorldRenderer wr, int renderPass, int GLListID) {
-		Room r = RoomTracker.instance.getActiveRoom();
-		if (r == null) { //do not bother culling if you are not in a room
-
-		}
-		else {
-			if (!r.getSettings().isCulling(CullingTypes.CHUNK))
-				return false;
-			if (!r.contains(wr)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public int chunkRenderSortIndex() {
-		return 0;
 	}
 
 	@SubscribeEvent
