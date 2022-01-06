@@ -72,6 +72,7 @@ public class ArchiSections extends DragonAPIMod {
 	public static int chunkBufferXZ;
 	public static int chunkBufferY;
 	public static boolean disableOnSneak;
+	public static boolean addLayer;
 
 	@Override
 	@EventHandler
@@ -90,6 +91,7 @@ public class ArchiSections extends DragonAPIMod {
 		disableOnSneak = config.getBoolean("Options", "Cancel (Tile)Entity Culling if Sneaking", true);
 		chunkBufferXZ = config.getInteger("Options", "Chunk Derendering Buffer (Horizontal)", 0);
 		chunkBufferY = config.getInteger("Options", "Chunk Derendering Buffer (Vertical)", 0);
+		addLayer = config.getBoolean("Options", "Add One Block To Room Bounds", true);
 		config.finishReading();
 
 		roomBlock = new RoomBlock();

@@ -9,6 +9,7 @@ import net.minecraft.client.particle.EntityFX;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -18,6 +19,7 @@ import Reika.ArchiSections.Control.CullingTypes;
 import Reika.DragonAPI.Extras.ThrottleableEffectRenderer.ParticleSpawnHandler;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
 import Reika.DragonAPI.Instantiable.Data.Immutable.Coordinate;
+import Reika.DragonAPI.Libraries.ReikaAABBHelper;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -152,7 +154,32 @@ public class RoomTracker implements ParticleSpawnHandler {
 	}
 
 	public boolean isInActiveRoom(TileEntity e) {
-		return this.isInActiveRoom(e.worldObj, e.xCoord, e.yCoord, e.zCoord, CullingTypes.TILE);
+		//return this.isInActiveRoom(e.worldObj, e.xCoord, e.yCoord, e.zCoord, CullingTypes.TILE);
+		Room act = this.getActiveRoom();
+		if (act != null) {
+			return act.bounds.intersectsWith(e.getRenderBoundingBox());
+		}
+		else {
+			return this.existsOutsideRooms(e.worldObj.provider.dimensionId, e.getRenderBoundingBox());
+		}
+	}
+
+	private boolean existsOutsideRooms(int dim, AxisAlignedBB aabb) {
+		Iterator<Room> it = rooms.values().iterator();
+		while (it.hasNext()) {
+			Room r = it.next();
+			if (r.dimensionID == dim) {
+				if (r.isValid()) {
+					if (ReikaAABBHelper.fullyContains(r.bounds, aabb)) {
+						return false;
+					}
+				}
+				else {
+					it.remove();
+				}
+			}
+		}
+		return true;
 	}
 
 	public boolean isInActiveRoom(Entity e) {

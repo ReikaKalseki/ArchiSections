@@ -2,16 +2,20 @@ package Reika.ArchiSections;
 
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import Reika.ArchiSections.Control.RoomSettings;
 import Reika.ArchiSections.Control.TransparencyRules;
+import Reika.DragonAPI.ASM.DependentMethodStripper.ClassDependent;
 import Reika.DragonAPI.Base.TileEntityBase;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
 import Reika.DragonAPI.Libraries.Registry.ReikaParticleHelper;
+import Reika.DragonAPI.ModRegistry.InterfaceCache;
 import Reika.RotaryCraft.API.Interfaces.Screwdriverable;
 
+import buildcraft.api.core.IAreaProvider;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -23,6 +27,7 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 
 	private BlockBox bounds;
 	private int ticksSinceRoomSet;
+	private boolean customBounds;
 	//private UUID currentRoom;
 
 	private final RoomSettings settings = new RoomSettings();
@@ -110,12 +115,32 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	}
 
 	private void getDimensions(World world, int x, int y, int z) {
+		if (bounds != null && customBounds)
+			return;
 		BlockBox old = bounds;
-		bounds = null;
+		bounds = this.calcBounds(world, x, y, z);
+		if (bounds.equals(old))
+			return;
+		if (world.isRemote) {
+			this.assignRoom();
+		}
+		else {
+			this.triggerBlockUpdate();
+		}
+	}
+
+	private BlockBox calcBounds(World world, int x, int y, int z) {
+		for (int i = 0; i < 6; i++) {
+			TileEntity te = this.getAdjacentTileEntity(dirs[i]);
+			if (InterfaceCache.AREAPROVIDER.instanceOf(te)) {
+				customBounds = true;
+				return this.getFromAreaProvider(te);
+			}
+		}
 		int[] dists = new int[6];
 		for (int i = 0; i < 6; i++) {
 			dists[i] = MAX_SIZE;
-			ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
+			ForgeDirection dir = dirs[i];
 			for (int d = 1; d <= MAX_SIZE; d++) {
 				int dx = x+dir.offsetX*d;
 				int dy = y+dir.offsetY*d;
@@ -128,26 +153,28 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 				}
 			}
 		}
-		int minx = x-1-dists[ForgeDirection.WEST.ordinal()];
-		int miny = y-1-dists[ForgeDirection.DOWN.ordinal()];
-		int minz = z-1-dists[ForgeDirection.NORTH.ordinal()];
-		int maxx = x+1+dists[ForgeDirection.EAST.ordinal()];
-		int maxy = y+1+dists[ForgeDirection.UP.ordinal()];
-		int maxz = z+1+dists[ForgeDirection.SOUTH.ordinal()];
-		bounds = new BlockBox(minx, miny, minz, maxx, maxy, maxz);
+		int d = ArchiSections.addLayer ? 2 : 1;
+		int minx = x-d-dists[ForgeDirection.WEST.ordinal()];
+		int miny = y-d-dists[ForgeDirection.DOWN.ordinal()];
+		int minz = z-d-dists[ForgeDirection.NORTH.ordinal()];
+		int maxx = x+d+dists[ForgeDirection.EAST.ordinal()];
+		int maxy = y+d+dists[ForgeDirection.UP.ordinal()];
+		int maxz = z+d+dists[ForgeDirection.SOUTH.ordinal()];
+		BlockBox ret = new BlockBox(minx, miny, minz, maxx, maxy, maxz);
+		if (ret.getVolume() <= 2)
+			return null;
 		if (ArchiSections.requireSolidWalls) {
 			if (!this.checkForSolidWalls(world)) {
-				bounds = null;
+				ret = null;
 			}
 		}
-		if (bounds.equals(old))
-			return;
-		if (world.isRemote) {
-			this.assignRoom();
-		}
-		else {
-			this.triggerBlockUpdate();
-		}
+		return ret;
+	}
+
+	@ClassDependent("buildcraft.api.core.IAreaProvider")
+	private BlockBox getFromAreaProvider(TileEntity te) {
+		IAreaProvider iap = (IAreaProvider)te;
+		return BlockBox.getFromIAP(iap);
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -207,6 +234,8 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 		NBTTagCompound tag = new NBTTagCompound();
 		settings.writeToNBT(tag);
 		NBT.setTag("settings", tag);
+
+		NBT.setBoolean("custom", customBounds);
 	}
 
 	@Override
@@ -222,6 +251,8 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 			NBTTagCompound tag = NBT.getCompoundTag("settings");
 			settings.readFromNBT(tag);
 		}
+
+		customBounds = NBT.getBoolean("custom");
 
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
 			this.assignRoom();

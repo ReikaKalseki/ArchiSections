@@ -159,7 +159,7 @@ public class RoomBlock extends BlockTEBase {
 			return true;
 		TileRoomController te = (TileRoomController)world.getTileEntity(x, y, z);
 		RoomSettings rs = te.getSettings();
-		rs.toggleCullingType(CullingTypes.CHUNK);
+		rs.toggleCullingType(ep.isSneaking() ? CullingTypes.TILE : CullingTypes.CHUNK);
 		ReikaSoundHelper.playSoundFromServerAtBlock(world, x, y, z, "random.click", 0.5F, 0.66F, true);
 		return true;
 	}
