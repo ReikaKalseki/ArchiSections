@@ -12,13 +12,11 @@ package Reika.ArchiSections;
 import java.io.File;
 import java.net.URL;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.client.event.sound.PlaySoundEvent17;
+import net.minecraftforge.common.MinecraftForge;
 
 import Reika.ArchiSections.Command.ChunkRoomToggleCommand;
 import Reika.ArchiSections.Command.DumpOpacityDataCommand;
@@ -30,14 +28,8 @@ import Reika.DragonAPI.Base.DragonAPIMod;
 import Reika.DragonAPI.Base.DragonAPIMod.LoadProfiler.LoadPhase;
 import Reika.DragonAPI.Extras.ThrottleableEffectRenderer;
 import Reika.DragonAPI.Instantiable.Event.Client.ChunkWorldRenderEvent;
-import Reika.DragonAPI.Instantiable.Event.Client.ClientLogoutEvent;
-import Reika.DragonAPI.Instantiable.Event.Client.EntityRenderEvent;
-import Reika.DragonAPI.Instantiable.Event.Client.RenderItemStackEvent;
-import Reika.DragonAPI.Instantiable.Event.Client.SinglePlayerLogoutEvent;
-import Reika.DragonAPI.Instantiable.Event.Client.TileEntityRenderEvent;
 import Reika.DragonAPI.Instantiable.IO.ModLogger;
 import Reika.DragonAPI.Instantiable.IO.SimpleConfig;
-import Reika.DragonAPI.Instantiable.Rendering.StructureRenderer;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -47,8 +39,6 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -100,6 +90,7 @@ public class ArchiSections extends DragonAPIMod {
 		GameRegistry.registerTileEntity(TileRoomController.class, "RoomController");
 
 		FMLCommonHandler.instance().bus().register(this);
+		MinecraftForge.EVENT_BUS.register(AREvents.instance);
 		this.basicSetup(evt);
 		this.finishTiming();
 	}
@@ -180,75 +171,5 @@ public class ArchiSections extends DragonAPIMod {
 	public File getConfigFolder() {
 		return config.getConfigFolder();
 	}
-
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void interceptSound(PlaySoundEvent17 evt) {
-		if (!interceptSounds)
-			return;
-		if (Minecraft.getMinecraft().theWorld == null)
-			return;
-		Room r = RoomTracker.instance.getRoomForPos(Minecraft.getMinecraft().theWorld.provider.dimensionId, evt.sound.getXPosF(), evt.sound.getYPosF(), evt.sound.getZPosF());
-		if (!RoomTracker.instance.isActiveRoom(r)) {
-			evt.result = null;
-		}
-	}
-
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void interceptTileRender(TileEntityRenderEvent.Pre evt) {
-		if (evt.tileEntity.worldObj == null || StructureRenderer.isRenderingTiles())
-			return;
-		if (RenderItemStackEvent.runningItemRender) //for items which call TESRs or entity renders
-			return;
-		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
-			return;
-		if (!RoomTracker.instance.isInActiveRoom(evt.tileEntity))
-			evt.setCanceled(true);
-	}
-
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void interceptEntityRender(EntityRenderEvent evt) {
-		if (evt.entity.worldObj == null)
-			return;
-		if (evt.entity instanceof EntityItem)
-			return;
-		if (RenderItemStackEvent.runningItemRender) //for items which call TESRs or entity renders
-			return;
-		if (disableOnSneak && Minecraft.getMinecraft().thePlayer.isSneaking())
-			return;
-		if (!RoomTracker.instance.isInActiveRoom(evt.entity))
-			evt.setCanceled(true);
-	}
-
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void clearCache(SinglePlayerLogoutEvent evt) {
-		RoomTracker.instance.clear();
-	}
-
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void clearCache(ClientDisconnectionFromServerEvent evt) {
-		RoomTracker.instance.clear();
-	}
-
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void clearCache(ClientLogoutEvent evt) {
-		RoomTracker.instance.clear();
-	}
-	/*
-	@SubscribeEvent
-	public void clearCache(PlayerChangedDimensionEvent evt) {
-		RoomTracker.instance.clear();
-	}*/
-	/*
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public void interceptEntityRender(AddParticleEvent evt) {
-
-	}*/
 
 }

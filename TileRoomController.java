@@ -8,6 +8,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import Reika.ArchiSections.Control.RoomSettings;
 import Reika.ArchiSections.Control.TransparencyRules;
+import Reika.ChromatiCraft.API.Interfaces.LinkerCallback;
 import Reika.DragonAPI.ASM.DependentMethodStripper.ClassDependent;
 import Reika.DragonAPI.Base.TileEntityBase;
 import Reika.DragonAPI.Instantiable.Data.Immutable.BlockBox;
@@ -21,7 +22,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 
-public class TileRoomController extends TileEntityBase implements Screwdriverable {
+public class TileRoomController extends TileEntityBase implements Screwdriverable, LinkerCallback {
 
 	private static final int MAX_SIZE = 40;
 
@@ -29,8 +30,10 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	private int ticksSinceRoomSet;
 	private boolean customBounds;
 	//private UUID currentRoom;
+	private BlockBox boundsToUpdate;
 
 	private final RoomSettings settings = new RoomSettings();
+
 
 	@Override
 	public boolean allowTickAcceleration() {
@@ -40,6 +43,13 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 	@Override
 	public void updateEntity(World world, int x, int y, int z, int meta) {
 		if (!world.isRemote && this.getTicksExisted()%8 == 0) {
+			if (boundsToUpdate != null) {
+				bounds = boundsToUpdate;
+				boundsToUpdate = null;
+				customBounds = true;
+				RoomTracker.instance.removeRoom(this);
+				this.updateBounds(world);
+			}
 			if (bounds == null) {
 				this.getDimensions(world, x, y, z);
 			}
@@ -121,6 +131,10 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 		bounds = this.calcBounds(world, x, y, z);
 		if (bounds.equals(old))
 			return;
+		this.updateBounds(world);
+	}
+
+	private void updateBounds(World world) {
 		if (world.isRemote) {
 			this.assignRoom();
 		}
@@ -230,6 +244,11 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 			bounds.writeToNBT(tag);
 			NBT.setTag("room", tag);
 		}
+		if (boundsToUpdate != null) {
+			NBTTagCompound tag = new NBTTagCompound();
+			boundsToUpdate.writeToNBT(tag);
+			NBT.setTag("queue", tag);
+		}
 
 		NBTTagCompound tag = new NBTTagCompound();
 		settings.writeToNBT(tag);
@@ -245,6 +264,11 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 		if (NBT.hasKey("room")) {
 			NBTTagCompound tag = NBT.getCompoundTag("room");
 			bounds = BlockBox.readFromNBT(tag);
+		}
+		boundsToUpdate = null;
+		if (NBT.hasKey("queue")) {
+			NBTTagCompound tag = NBT.getCompoundTag("queue");
+			boundsToUpdate = BlockBox.readFromNBT(tag);
 		}
 
 		if (NBT.hasKey("settings")) {
@@ -307,6 +331,14 @@ public class TileRoomController extends TileEntityBase implements Screwdriverabl
 
 	public RoomSettings getSettings() {
 		return settings;
+	}
+
+	@Override
+	public void linkTo(World world, int x, int y, int z) {
+		TileEntity te = world.getTileEntity(x, y, z);
+		if (InterfaceCache.AREAPROVIDER.instanceOf(te)) {
+			boundsToUpdate = this.getFromAreaProvider(te);
+		}
 	}
 
 }
