@@ -5,11 +5,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Function;
+
+import com.google.common.base.Charsets;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLeavesBase;
@@ -58,7 +60,7 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 			}
 			LuaBlockDatabase data = new LuaBlockDatabase();
 			data.hasDuplicateKeys = true;
-			ArrayList<String> li = ReikaFileReader.getFileAsLines(f, true, Charset.defaultCharset());
+			List<String> li = ReikaFileReader.getFileAsLines(f, true, Charsets.UTF_8);
 			li.remove(0);
 			String s = li.remove(li.size()-1);
 			while (s.isEmpty() || s.charAt(0) != '=') {
@@ -85,7 +87,7 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 		f = new File(cfg.getConfigFolder(), "ArchiSections_Opacity_Overrides.cfg");
 		try {
 			if (f.exists()) {
-				ArrayList<String> li = ReikaFileReader.getFileAsLines(f, true);
+				List<String> li = ReikaFileReader.getFileAsLines(f, true, Charsets.UTF_8);
 				for (String s : li) {
 					try {
 						s = ReikaStringParser.stripSpaces(s);
@@ -138,7 +140,7 @@ public class TransparencyRules implements EvaluatorConstructor<Block> {
 				li.add(ReikaStringParser.getNOf("-", 45));
 				li.add("# Add new entries below the following line");
 				li.add(ReikaStringParser.getNOf("=", 60));
-				ReikaFileReader.writeLinesToFile(f, li, true);
+				ReikaFileReader.writeLinesToFile(f, li, true, Charsets.UTF_8);
 			}
 		}
 		catch (IOException e) {
